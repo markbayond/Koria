@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyHub — Tu carpeta de estudio, ordenada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#EEF0E9',
+          'paper-dark': '#E4E6DC',
+          ink: '#1B2430',
+          'ink-soft': '#5B6472',
+          line: '#D6D9CC',
+        },
+        fontFamily: {
+          display: ['Fraunces', 'serif'],
+          body: ['Inter', 'sans-serif'],
+          mono: ['"IBM Plex Mono"', 'monospace'],
+        },
+      },
+    },
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { background-color: #EEF0E9; }
+
+  /* Textura sutil de papel */
+  .paper-texture {
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(27,36,48,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+
+  /* Riel de perforaciones estilo hojas de carpeta */
+  .punch-rail {
+    background-image: radial-gradient(circle, #EEF0E9 3px, transparent 3.5px);
+    background-size: 100% 28px;
+    background-position: center 14px;
+  }
+  .punch-rail::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    left: 50%;
+    width: 1px;
+    background: repeating-linear-gradient(to bottom, #D6D9CC 0 6px, transparent 6px 12px);
+    transform: translateX(-50%);
+  }
+
+  /* Forma de pestaña de carpeta (tab) */
+  .tab-shape {
+    clip-path: polygon(6% 0%, 94% 0%, 100% 100%, 0% 100%);
+  }
+
+  .tab-card {
+    position: relative;
+    transition: transform .25s ease, box-shadow .25s ease;
+  }
+  .tab-card:hover, .tab-card:focus-within {
+    transform: translateY(-6px);
+  }
+  .tab-card .tab-flag {
+    clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%);
+  }
+
+  /* Animación de abanico en el héroe */
+  @keyframes fanIn {
+    from { opacity: 0; transform: translateY(28px) rotate(var(--r, 0deg)) scale(.92); }
+    to   { opacity: 1; transform: translateY(0) rotate(var(--r, 0deg)) scale(1); }
+  }
+  .fan-tab { animation: fanIn .7s cubic-bezier(.2,.7,.2,1) both; }
+  .fan-tab:nth-child(1){ animation-delay: .05s }
+  .fan-tab:nth-child(2){ animation-delay: .12s }
+  .fan-tab:nth-child(3){ animation-delay: .19s }
+  .fan-tab:nth-child(4){ animation-delay: .26s }
+  .fan-tab:nth-child(5){ animation-delay: .33s }
+  .fan-tab:nth-child(6){ animation-delay: .40s }
+  .fan-tab:nth-child(7){ animation-delay: .47s }
+  .fan-tab:nth-child(8){ animation-delay: .54s }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .fan-tab { animation: none !important; }
+    .tab-card, .tab-card:hover { transition: none !important; transform: none !important; }
+  }
+
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .chev { transform: rotate(180deg); }
+
+  .demo-tab.is-active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid #1B2430;
+    outline-offset: 2px;
+  }
+
+  .index-code::before {
+    content: attr(data-code);
+  }
+</style>
+</head>
+<body class="font-body text-ink antialiased">
+
+<!-- ============ NAV ============ -->
+<header class="sticky top-0 z-40 bg-paper/90 backdrop-blur border-b border-line">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2.5 shrink-0">
+      <span class="flex gap-[3px]">
+        <span class="w-2 h-4 rounded-[2px] bg-blue-600"></span>
+        <span class="w-2 h-4 rounded-[2px] bg-emerald-600"></span>
+        <span class="w-2 h-4 rounded-[2px] bg-amber-600"></span>
+        <span class="w-2 h-4 rounded-[2px] bg-violet-600"></span>
+      </span>
+      <span class="font-display font-semibold text-lg tracking-tight">StudyHub</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-ink-soft">
+      <a href="#materias" class="hover:text-ink transition-colors">Materias</a>
+      <a href="#dentro-de-un-tema" class="hover:text-ink transition-colors">Cómo se organiza</a>
+      <a href="#escalable" class="hover:text-ink transition-colors">Panel de administración</a>
+    </nav>
+    <a href="#cta" class="text-sm font-semibold bg-ink text-paper px-4 py-2 rounded-md hover:bg-ink/85 transition-colors">
+      Solicitar demo
+    </a>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section id="top" class="relative overflow-hidden">
+  <div class="paper-texture absolute inset-0 pointer-events-none opacity-70"></div>
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 pt-16 pb-24 lg:pt-24 lg:pb-32 relative grid lg:grid-cols-[1.05fr_0.95fr] gap-14 items-center">
+
+    <div>
+      <p class="index-code font-mono text-xs tracking-widest text-ink-soft uppercase mb-5 border border-line rounded-full inline-block px-3 py-1 bg-white/60" data-code="Sistema · ES / DE / EN"></p>
+      <h1 class="font-display text-[2.6rem] leading-[1.05] sm:text-6xl sm:leading-[1.03] font-semibold tracking-tight max-w-xl">
+        Tu carpeta de estudio,<br>
+        <span class="italic font-medium text-blue-700">ordenada por materia.</span>
+      </h1>
+      <p class="mt-6 text-lg text-ink-soft max-w-md leading-relaxed">
+        Cada materia tiene su pestaña. Cada tema, su lugar. StudyHub reúne resúmenes, videos, PDFs y ejercicios en un solo lugar — y crece sin que nadie tenga que tocar código.
+      </p>
+      <div class="mt-9 flex flex-wrap items-center gap-4">
+        <a href="#materias" class="bg-ink text-paper px-6 py-3.5 rounded-md font-semibold text-sm hover:bg-ink/85 transition-colors">
+          Explorar materias
+        </a>
+        <a href="#escalable" class="px-6 py-3.5 rounded-md font-semibold text-sm border border-ink/20 hover:border-ink/50 transition-colors">
+          Ver panel de administración
+        </a>
+      </div>
+
+      <div class="mt-14 grid grid-cols-3 gap-6 max-w-md border-t border-line pt-6">
+        <div>
+          <p class="font-display text-2xl font-semibold">8+</p>
+          <p class="text-xs text-ink-soft mt-1">materias activas</p>
+        </div>
+        <div>
+          <p class="font-display text-2xl font-semibold">7</p>
+          <p class="text-xs text-ink-soft mt-1">pestañas por tema</p>
+        </div>
+        <div>
+          <p class="font-display text-2xl font-semibold">∞</p>
+          <p class="text-xs text-ink-soft mt-1">temas por agregar</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ilustración: abanico de pestañas de carpeta -->
+    <div class="relative h-[380px] sm:h-[440px]" aria-hidden="true">
+      <div class="absolute inset-0 flex items-end justify-center pb-4">
+        <div class="relative w-full max-w-md h-full">
+          <!-- MAT -->
+          <div class="fan-tab absolute left-1/2 bottom-0 w-40 h-64 -translate-x-1/2 bg-blue-600 rounded-t-lg shadow-xl" style="--r:-24deg; transform-origin:bottom center;">
+            <p class="font-mono text-white/90 text-xs tracking-widest px-4 pt-5">MAT</p>
+          </div>
+          <!-- LEN -->
+          <div class="fan-tab absolute left-1/2 bottom-0 w-40 h-64 -translate-x-1/2 bg-red-700 rounded-t-lg shadow-xl" style="--r:-17deg; transform-origin:bottom center;">
+            <p class="font-mono text-white/90 text-xs tracking-widest px-4 pt-5">LEN</p>
+          </div>
+          <!-- ENG -->
+          <div class="fan-tab absolute left-1/2 bottom-0 w-40 h-64 -translate-x-1/2 bg-amber-700 rounded-t-lg shadow-xl" style="--r:-9deg; transform-origin:bottom center;">
+            <p class="font-mono text-white/90 text-xs tracking-widest px-4 pt-5">ENG</p>
+          </div>
+          <!-- BIO -->
+          <div class="fan-tab absolute left-1/2 bottom-0 w-40 h-64 -translate-x-1/2 bg-emerald-600 rounded-t-lg shadow-xl" style="--r:0deg; transform-origin:bottom center;">
+            <p class="font-mono text-white/90 text-xs tracking-widest px-4 pt-5">BIO</p>
+          </div>
+          <!-- DEU -->
+          <div class="fan-tab absolute left-1/2 bottom-0 w-40 h-64 -translate-x-1/2 bg-orange-700 rounded-t-lg shadow-xl" style="--r:9deg; transform-origin:bottom center;">
+            <p class="font-mono text-white/90 text-xs tracking-widest px-4 pt-5">DEU</p>
+          </div>
+          <!-- HIS -->
+          <div class="fan-tab absolute left-1/2 bottom-0 w-40 h-64 -translate-x-1/2 bg-violet-700 rounded-t-lg shadow-xl" style="--r:17deg; transform-origin:bottom center;">
+            <p class="font-mono text-white/90 text-xs tracking-widest px-4 pt-5">HIS</p>
+          </div>
+          <!-- BIO·DE -->
+          <div class="fan-tab absolute left-1/2 bottom-0 w-40 h-64 -translate-x-1/2 bg-teal-600 rounded-t-lg shadow-xl" style="--r:24deg; transform-origin:bottom center;">
+            <p class="font-mono text-white/90 text-xs tracking-widest px-4 pt-5">BIO·DE</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MATERIAS ============ -->
+<section id="materias" class="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
+  <div class="max-w-2xl mb-14">
+    <p class="font-mono text-xs tracking-widest text-ink-soft uppercase mb-3">Página principal</p>
+    <h2 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight">Una pestaña por materia.</h2>
+    <p class="mt-4 text-ink-soft text-lg leading-relaxed">
+      Abre una tarjeta y verás su temario completo — igual que hojear el índice de una carpeta física. Toca cada una para ver los temas que contiene.
+    </p>
+  </div>
+
+  <div id="subject-grid" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <!-- Las tarjetas se insertan aquí por JS a partir de SUBJECTS -->
+  </div>
+</section>
+
+<!-- ============ DENTRO DE UN TEMA ============ -->
+<section id="dentro-de-un-tema" class="bg-ink text-paper">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
+    <div class="max-w-2xl mb-12">
+      <p class="font-mono text-xs tracking-widest text-paper/50 uppercase mb-3">Dentro de cada tema</p>
+      <h2 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight">Siete pestañas, un mismo tema.</h2>
+      <p class="mt-4 text-paper/70 text-lg leading-relaxed">
+        Resumen, videos, presentaciones, PDFs, hojas de estudio, ejercicios y recursos adicionales — todo organizado igual, sin importar la materia. Prueba cambiando de tema:
+      </p>
+    </div>
+
+    <!-- Selector de tema de ejemplo -->
+    <div class="flex flex-wrap gap-2 mb-6" id="demo-topic-picker" role="tablist" aria-label="Elegir tema de ejemplo"></div>
+
+    <!-- Tarjeta "página de carpeta" -->
+    <div class="bg-paper text-ink rounded-lg overflow-hidden shadow-2xl">
+      <div class="flex overflow-x-auto" id="demo-pestanas" role="tablist" aria-label="Pestañas del tema"></div>
+      <div class="p-8 lg:p-10 min-h-[220px]" id="demo-panel"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ESCALABILIDAD / ADMIN ============ -->
+<section id="escalable" class="max-w-7xl mx-auto px-6 lg:px-10 py-20 lg:py-28">
+  <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-14 items-start">
+    <div class="lg:sticky lg:top-24">
+      <p class="font-mono text-xs tracking-widest text-ink-soft uppercase mb-3">Panel de administración</p>
+      <h2 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight">Se administra con clics, no con código.</h2>
+      <p class="mt-4 text-ink-soft text-lg leading-relaxed">
+        Agrega una materia nueva, un tema o un recurso desde el panel — sin tocar el código fuente. El sistema está pensado para cientos de materias y miles de temas.
+      </p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-5">
+      <div class="relative border border-line rounded-lg p-6 bg-white/60">
+        <div class="w-9 h-9 rounded-md bg-blue-600 flex items-center justify-center mb-4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" class="w-5 h-5"><path d="M4 6h16M4 12h16M4 18h10" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="font-semibold mb-1.5">Materias, unidades y temas editables</h3>
+        <p class="text-sm text-ink-soft leading-relaxed">Crea, edita o elimina cualquier nivel del temario — desde una materia completa hasta un solo tema — en segundos.</p>
+      </div>
+
+      <div class="relative border border-line rounded-lg p-6 bg-white/60">
+        <div class="w-9 h-9 rounded-md bg-emerald-600 flex items-center justify-center mb-4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" class="w-5 h-5"><path d="M12 4v16M4 12h16" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="font-semibold mb-1.5">Siete tipos de recurso</h3>
+        <p class="text-sm text-ink-soft leading-relaxed">Texto, PDF, video de YouTube, archivo de video, presentación, imagen o enlace — todos con el mismo flujo de carga.</p>
+      </div>
+
+      <div class="relative border border-line rounded-lg p-6 bg-white/60">
+        <div class="w-9 h-9 rounded-md bg-amber-700 flex items-center justify-center mb-4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" class="w-5 h-5"><path d="M4 20V10m6 10V4m6 16v-7" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="font-semibold mb-1.5">Pensado para crecer</h3>
+        <p class="text-sm text-ink-soft leading-relaxed">La misma estructura funciona con 8 materias o con 800 — el panel no distingue tamaño.</p>
+      </div>
+
+      <div class="relative border border-line rounded-lg p-6 bg-white/60">
+        <div class="w-9 h-9 rounded-md bg-violet-700 flex items-center justify-center mb-4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" class="w-5 h-5"><path d="M4 6h16M4 12h10M4 18h16" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="font-semibold mb-1.5">Multilingüe de fábrica</h3>
+        <p class="text-sm text-ink-soft leading-relaxed">Materias en español y en alemán conviven como entradas independientes del mismo temario.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section id="cta" class="max-w-7xl mx-auto px-6 lg:px-10 pb-24">
+  <div class="rounded-2xl bg-ink text-paper px-8 py-14 lg:px-16 lg:py-16 text-center relative overflow-hidden">
+    <h2 class="font-display text-3xl sm:text-4xl font-semibold tracking-tight max-w-lg mx-auto">
+      Arma la carpeta de estudio de tu institución.
+    </h2>
+    <p class="mt-4 text-paper/70 max-w-md mx-auto">Empieza con las materias de tu colegio y agrega el resto desde el panel, cuando lo necesites.</p>
+    <a href="#top" class="inline-block mt-8 bg-paper text-ink px-7 py-3.5 rounded-md font-semibold text-sm hover:bg-paper/90 transition-colors">
+      Solicitar una demo
+    </a>
+  </div>
+</section>
+
+<footer class="border-t border-line">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-ink-soft">
+    <p>© 2026 StudyHub.</p>
+    <p class="font-mono text-xs">Hecho para colegios bilingües — ES · DE · EN</p>
+  </div>
+</footer>
+
+<script>
+  // ------- Datos de materias (todo vendría del panel de administración) -------
+  const SUBJECTS = [
+    { name: 'Matemáticas', code: 'MAT',    color: '#2563EB', topics: ['Álgebra','Geometría','Funciones','Trigonometría','Estadística'],
+      icon: '<path d="M4 20 12 4l8 16H4Z" stroke-linejoin="round"/><path d="M9 14h6"/>' },
+    { name: 'Biología', code: 'BIO·ES', color: '#16A34A', topics: ['La célula','Genética','Ecología','Evolución','Sistemas del cuerpo humano'],
+      icon: '<path d="M12 21c-4.5-3-7-6.2-7-10A7 7 0 0 1 12 4a7 7 0 0 1 7 7c0 3.8-2.5 7-7 10Z"/><path d="M12 21V9"/>' },
+    { name: 'Biologie', code: 'BIO·DE', color: '#0D9488', topics: ['Die Zelle','Genetik','Ökologie','Evolution','Organsysteme'],
+      icon: '<path d="M7 4c5 2 5 6 0 8s-5 6 0 8"/><path d="M17 4c-5 2-5 6 0 8s5 6 0 8"/>' },
+    { name: 'Inglés', code: 'ENG', color: '#B45309', topics: ['Grammar','Vocabulary','Reading','Listening','Writing'],
+      icon: '<path d="M5 5h11a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H10l-5 4V5Z" stroke-linejoin="round"/>' },
+    { name: 'Lengua', code: 'LEN', color: '#B91C1C', topics: ['Gramática','Ortografía','Literatura','Comprensión lectora','Redacción'],
+      icon: '<path d="M6 4h9a3 3 0 0 1 3 3v13H9a3 3 0 0 1-3-3V4Z" stroke-linejoin="round"/><path d="M6 4v13a3 3 0 0 0 3 3"/>' },
+    { name: 'Alemán', code: 'DEU', color: '#C2410C', topics: ['Grammatik','Wortschatz','Lesen','Hören','Schreiben'],
+      icon: '<path d="M5 5h11a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H10l-5 4V5Z" stroke-linejoin="round"/><circle cx="10" cy="10" r=".6" fill="white"/><circle cx="13.5" cy="10" r=".6" fill="white"/>' },
+    { name: 'Historia', code: 'HIS·ES', color: '#7C3AED', topics: ['Edad Antigua','Edad Media','Edad Moderna','Edad Contemporánea','Historia de Ecuador'],
+      icon: '<path d="M4 20h16M6 20V9l6-4 6 4v11M9 20v-6h6v6"/>' },
+    { name: 'Geschichte', code: 'HIS·DE', color: '#4F46E5', topics: ['Antike','Mittelalter','Neuzeit','Moderne','Geschichte Ecuadors'],
+      icon: '<path d="M6 4h9l3 3v13H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke-linejoin="round"/><path d="M9 9h6M9 13h6"/>' },
+  ];
+
+  const grid = document.getElementById('subject-grid');
+  SUBJECTS.forEach((s) => {
+    const el = document.createElement('details');
+    el.className = 'tab-card group border border-line rounded-lg bg-white/60 overflow-hidden';
+    el.innerHTML = `
+      <summary class="p-5 flex flex-col gap-4 outline-none">
+        <div class="flex items-start justify-between">
+          <div class="w-11 h-11 rounded-md flex items-center justify-center shrink-0" style="background:${s.color}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.6" class="w-6 h-6">${s.icon}</svg>
+          </div>
+          <span class="chev text-ink-soft transition-transform">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="w-4 h-4"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </div>
+        <div>
+          <p class="font-mono text-[10px] tracking-widest text-ink-soft uppercase">${s.code}</p>
+          <p class="font-display font-semibold text-lg mt-0.5">${s.name}</p>
+          <p class="text-xs text-ink-soft mt-1">${s.topics.length} temas</p>
+        </div>
+      </summary>
+      <div class="px-5 pb-5 pt-1 border-t border-line/80">
+        <ul class="space-y-2">
+          ${s.topics.map((t,i) => `
+            <li class="flex items-center gap-2.5 text-sm">
+              <span class="font-mono text-[10px] w-5 text-ink-soft">${String(i+1).padStart(2,'0')}</span>
+              <span>${t}</span>
+            </li>`).join('')}
+        </ul>
+      </div>`;
+    grid.appendChild(el);
+  });
+
+  // ------- Demo de pestañas dentro de un tema -------
+  const TABS = ['Resumen','Videos','Presentaciones','PDFs','Hojas de estudio','Ejercicios','Recursos adicionales'];
+  const DEMO_TOPICS = [
+    { subject: 'Matemáticas', topic: 'Álgebra', color: '#2563EB',
+      content: {
+        'Resumen': 'Ecuaciones lineales, factorización y el uso de variables para representar cantidades desconocidas.',
+        'Videos': '3 videos — "Introducción a las ecuaciones", "Factorización paso a paso", "Problemas con dos variables".',
+        'Presentaciones': '1 presentación — "Álgebra: de la aritmética a las variables" (18 diapositivas).',
+        'PDFs': '2 PDF — Guía de fórmulas y banco de 40 ejercicios resueltos.',
+        'Hojas de estudio': 'Ficha de una página con las propiedades de la igualdad y casos de factorización.',
+        'Ejercicios': '25 ejercicios interactivos con retroalimentación inmediata.',
+        'Recursos adicionales': 'Enlace a una calculadora de ecuaciones y a un glosario de términos algebraicos.',
+      } },
+    { subject: 'Biologie', topic: 'Die Zelle', color: '#0D9488',
+      content: {
+        'Resumen': 'Aufbau der Zelle, Zellorganellen und der Unterschied zwischen Pflanzen- und Tierzellen.',
+        'Videos': '2 Videos — "Die Zelle unter dem Mikroskop", "Organellen und ihre Funktion".',
+        'Presentaciones': '1 Präsentation — "Zellaufbau im Vergleich" (14 Folien).',
+        'PDFs': '1 PDF — Beschriftetes Diagramm der Zellorganellen.',
+        'Hojas de estudio': 'Karteikarten mit den wichtigsten Fachbegriffen.',
+        'Ejercicios': '18 Übungen zur Zuordnung von Organellen und Funktionen.',
+        'Recursos adicionales': 'Link zu einer interaktiven 3D-Zellansicht.',
+      } },
+    { subject: 'Inglés', topic: 'Grammar', color: '#B45309',
+      content: {
+        'Resumen': 'Present, past and future tenses, with a focus on regular and irregular verbs.',
+        'Videos': '4 videos — "Present tense basics", "Irregular verbs", "Building future sentences", "Common mistakes".',
+        'Presentaciones': '1 slide deck — "Verb Tenses at a Glance" (20 slides).',
+        'PDFs': '2 PDF handouts — Irregular verb list and a tense comparison chart.',
+        'Hojas de estudio': 'One-page cheat sheet with tense signal words.',
+        'Ejercicios': '30 fill-in-the-blank and multiple-choice exercises.',
+        'Recursos adicionales': 'Link to an online verb conjugator.',
+      } },
+  ];
+
+  const picker = document.getElementById('demo-topic-picker');
+  const pestanasBar = document.getElementById('demo-pestanas');
+  const panel = document.getElementById('demo-panel');
+  let activeTopic = 0;
+  let activeTab = 0;
+
+  function renderDemo() {
+    const d = DEMO_TOPICS[activeTopic];
+
+    picker.innerHTML = DEMO_TOPICS.map((t, i) => `
+      <button data-i="${i}" role="tab" aria-selected="${i===activeTopic}"
+        class="topic-btn px-4 py-2 rounded-full text-sm font-medium border transition-colors ${i===activeTopic ? 'text-white border-transparent' : 'border-paper/25 text-paper/70 hover:border-paper/50'}"
+        style="${i===activeTopic ? `background:${t.color}` : ''}">
+        ${t.subject} · ${t.topic}
+      </button>`).join('');
+
+    pestanasBar.innerHTML = TABS.map((tab, i) => `
+      <button data-i="${i}" role="tab" aria-selected="${i===activeTab}"
+        class="demo-tab shrink-0 px-5 py-3.5 text-sm font-medium border-b-2 ${i===activeTab ? 'is-active border-transparent' : 'border-transparent text-ink-soft hover:text-ink'}"
+        style="--accent:${d.color}; ${i===activeTab ? '' : 'background:transparent'}">
+        ${tab}
+      </button>`).join('');
+
+    panel.innerHTML = `
+      <p class="font-mono text-[10px] tracking-widest uppercase mb-3" style="color:${d.color}">${d.subject} · ${d.topic} · ${TABS[activeTab]}</p>
+      <p class="text-ink-soft leading-relaxed max-w-xl">${d.content[TABS[activeTab]]}</p>`;
+
+    picker.querySelectorAll('.topic-btn').forEach(btn => btn.addEventListener('click', () => {
+      activeTopic = Number(btn.dataset.i); activeTab = 0; renderDemo();
+    }));
+    pestanasBar.querySelectorAll('.demo-tab').forEach(btn => btn.addEventListener('click', () => {
+      activeTab = Number(btn.dataset.i); renderDemo();
+    }));
+  }
+  renderDemo();
+</script>
+</body>
+</html>
