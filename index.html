@@ -12,6 +12,8 @@
         :root {
             --color-fondo: #F7F5F0; /* Crema suave */
             --color-texto: #3B4D3C; /* Verde oliva oscuro */
+            --color-morado-koria: #92759E; /* Morado elegante para el logo */
+            --color-lila-suave: #C3AED6; /* Lila para la línea secundaria */
             --transicion: all 0.5s ease-in-out;
         }
 
@@ -26,6 +28,7 @@
             background-color: var(--color-fondo);
             color: var(--color-texto);
             line-height: 1.6;
+            overflow-x: hidden; /* Evita scroll horizontal por las decoraciones */
         }
 
         h1, h2, h3 {
@@ -33,8 +36,9 @@
             font-weight: 600;
         }
 
-        /* SECCIÓN 1: PORTADA (HERO) */
+        /* SECCIÓN 1: PORTADA (HERO) RENOVADA */
         .hero {
+            position: relative;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -42,12 +46,102 @@
             justify-content: center;
             text-align: center;
             padding: 2rem;
+            overflow: hidden; /* Mantiene las diagonales dentro de la caja */
         }
 
-        .hero h1 {
-            font-size: 5rem;
-            letter-spacing: 2px;
-            margin-bottom: 0.5rem;
+        /* Decoraciones de Fondo (Líneas Diagonales) */
+        .decoraciones-fondo {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* Evita que estorben al hacer clic */
+            z-index: 1;
+        }
+
+        .linea-diag {
+            position: absolute;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        /* Esquina Superior Izquierda */
+        .izq-principal {
+            top: -60px; left: -100px;
+            width: 350px; height: 120px;
+            transform: rotate(-45deg);
+            background-color: var(--color-morado-koria);
+        }
+        .izq-secundaria {
+            top: 40px; left: -140px;
+            width: 350px; height: 40px;
+            transform: rotate(-45deg);
+            background-color: var(--color-lila-suave);
+        }
+
+        /* Esquina Superior Derecha */
+        .der-principal {
+            top: -60px; right: -100px;
+            width: 350px; height: 120px;
+            transform: rotate(45deg);
+            background-color: var(--color-morado-koria);
+        }
+        .der-secundaria {
+            top: 40px; right: -140px;
+            width: 350px; height: 40px;
+            transform: rotate(45deg);
+            background-color: var(--color-lila-suave);
+        }
+
+        /* Flores Decorativas Flotantes */
+        .flor-flotante {
+            position: absolute;
+            opacity: 0.85;
+            z-index: 1;
+        }
+        .flor-izq {
+            top: 15%;
+            left: 8%;
+            width: 160px;
+            transform: rotate(-15deg);
+            animation: flotar-lento 8s ease-in-out infinite;
+        }
+        .flor-der {
+            bottom: 10%;
+            right: 8%;
+            width: 180px;
+            transform: rotate(20deg);
+            animation: flotar-lento 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes flotar-lento {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        /* Contenido Principal de la Portada */
+        .hero-contenido {
+            position: relative;
+            z-index: 2; /* Mantiene el texto e imagen principal al frente */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Recuadro Morado para el Título KORIA */
+        .hero-titulo-caja {
+            background-color: var(--color-morado-koria);
+            padding: 1rem 5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 30px rgba(146, 117, 158, 0.3);
+            border-radius: 2px;
+        }
+
+        .hero-titulo-caja h1 {
+            color: var(--color-fondo);
+            font-size: 5.5rem;
+            letter-spacing: 6px;
+            margin: 0;
+            line-height: 1.2;
+            text-transform: uppercase;
         }
 
         .hero h2 {
@@ -66,7 +160,7 @@
         }
 
         .hero-img {
-            max-height: 50vh;
+            max-height: 45vh;
             object-fit: contain;
             animation: flotar 6s ease-in-out infinite;
         }
@@ -81,7 +175,7 @@
         .interactivo {
             padding: 5rem 2rem;
             transition: var(--transicion);
-            background-color: #E8E4EB; /* Color inicial (Lavanda) */
+            background-color: #E8E4EB; 
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -129,7 +223,7 @@
 
         .col-izq img {
             width: 100%;
-            max-height: 70vh; /* Ajustado a 70vh */
+            max-height: 70vh; 
             object-fit: contain;
             transform: rotate(-5deg);
             transition: var(--transicion);
@@ -143,7 +237,7 @@
         .col-der h3 {
             font-size: 3rem;
             margin-bottom: 0.5rem;
-        } /* <--- AQUÍ FALTABA ESTA LLAVE DE CIERRE */
+        }
 
         .categoria {
             font-size: 0.9rem;
@@ -205,18 +299,42 @@
                 transform: rotate(0);
                 max-height: 80vh;
             }
-            .hero h1 { font-size: 3.5rem; }
+            .hero-titulo-caja h1 { font-size: 3.5rem; }
+            .flor-flotante { display: none; } /* Oculta flores en celular para ahorrar espacio */
+            .izq-principal, .der-principal { width: 250px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- SECCIÓN 1: PORTADA -->
+    <!-- SECCIÓN 1: PORTADA RENOVADA -->
     <header class="hero">
-        <h1>Koria</h1>
-        <h2>Aromas que conectan contigo.</h2>
-        <p>Perfumes sin alcohol, a base de aceites esenciales y pensados para cuidar tu piel en un práctico formato de llavero.</p>
-        <img src="Gemini_Generated_Image_y5sr22y5sr22y5sr-removebg-preview.png" alt="Perfume Koria Lavanda" class="hero-img">
+        
+        <!-- Elementos Decorativos de Fondo -->
+        <div class="decoraciones-fondo">
+            <!-- Esquina Izquierda -->
+            <div class="linea-diag izq-principal"></div>
+            <div class="linea-diag izq-secundaria"></div>
+            
+            <!-- Esquina Derecha -->
+            <div class="linea-diag der-principal"></div>
+            <div class="linea-diag der-secundaria"></div>
+
+            <!-- Imágenes de flores (Asegúrate de subirlas a GitHub) -->
+            <img src="flor_lavanda_decoracion.png" class="flor-flotante flor-izq" alt="Decoración Lavanda">
+            <img src="hojas_citricas_decoracion.png" class="flor-flotante flor-der" alt="Decoración Botánica">
+        </div>
+
+        <!-- Contenido Central -->
+        <div class="hero-contenido">
+            <div class="hero-titulo-caja">
+                <h1>Koria</h1>
+            </div>
+            <h2>Aromas que conectan contigo.</h2>
+            <p>Perfumes sin alcohol, a base de aceites esenciales y pensados para cuidar tu piel en un práctico formato de llavero.</p>
+            <img src="Gemini_Generated_Image_y5sr22y5sr22y5sr-removebg-preview.png" alt="Perfume Koria Lavanda" class="hero-img">
+        </div>
+        
     </header>
 
     <!-- SECCIÓN 2: INTERACTIVA -->
@@ -266,7 +384,6 @@
 
     <!-- LÓGICA INTERACTIVA (JAVASCRIPT) -->
     <script>
-        // Aquí guardamos toda la información de cada perfume
         const datosAromas = {
             lavanda: {
                 titulo: "Lavanda",
@@ -274,7 +391,7 @@
                 descripcion: "El equilibrio perfecto entre pureza y serenidad. Calma los sentidos y cuida las pieles más delicadas.",
                 notas: "Lavanda fresca, toques florales silvestres y fondo herbal.",
                 imagen: "Gemini_Generated_Image_y5sr22y5sr22y5sr-removebg-preview.png",
-                colorFondo: "#E8E4EB" /* Morado pastel */
+                colorFondo: "#E8E4EB" 
             },
             mandarina: {
                 titulo: "Mandarina",
@@ -282,7 +399,7 @@
                 descripcion: "Una brisa ligera, limpia y revitalizante. Ideal para quienes buscan nuevos comienzos y energía limpia.",
                 notas: "Mandarina recién cortada, cítricos suaves y hojas verdes.",
                 imagen: "Gemini_Generated_Image_7tz6or7tz6or7tz6-removebg-preview.png",
-                colorFondo: "#E6EFDB" /* Verde/Naranja pastel */
+                colorFondo: "#E6EFDB" 
             },
             vainilla: {
                 titulo: "Vainilla",
@@ -290,7 +407,7 @@
                 descripcion: "Un abrazo cálido y reconfortante. Pensada para almas románticas que encuentran belleza en las pequeñas cosas.",
                 notas: "Vainilla pura, destellos empolvados y fondo cálido.",
                 imagen: "Gemini_Generated_Image_hq1zjrhq1zjrhq1z-removebg-preview.png",
-                colorFondo: "#F5E9E4" /* Rosa crema pastel */
+                colorFondo: "#F5E9E4" 
             },
             pomelo: {
                 titulo: "Pomelo Rosado",
@@ -298,33 +415,29 @@
                 descripcion: "Una chispa de alegría y optimismo en cada gota. Su perfil frutal y vibrante ilumina tus días, llenando tu entorno de energía positiva.",
                 notas: "Toronja rosa, chispa frutal y flor de naranjo.",
                 imagen: "Gemini_Generated_Image_5qag1j5qag1j5qag-removebg-preview.png",
-                colorFondo: "#F7E1E6" /* Coral pastel */
+                colorFondo: "#F7E1E6" 
             },
             ambar: {
                 titulo: "Ámbar",
                 categoria: "Categoría: Fuerte",
                 descripcion: "Carácter, presencia y misterio. Una esencia intensa y cálida para personalidades seguras.",
                 notas: "Resinas doradas de ámbar, toques cálidos y fondo maderoso.",
-                imagen: "Gemini_Generated_Image_3tdwk13tdwk13tdw-removebg-preview.png",
-                colorFondo: "#F7EEDB" /* Mostaza/Amarillo pastel */
+                imagen: "Gemini_Generated_Image_3tdwk13tdwk13tdw-removebg-preview (1).png",
+                colorFondo: "#F7EEDB" 
             }
         };
 
         function cambiarAroma(aromaSeleccionado) {
-            // Obtener los datos del aroma seleccionado
             const datos = datosAromas[aromaSeleccionado];
 
-            // 1. Cambiar la imagen y los textos
             document.getElementById("img-dinamica").src = datos.imagen;
             document.getElementById("titulo-dinamico").innerText = datos.titulo;
             document.getElementById("categoria-dinamica").innerText = datos.categoria;
             document.getElementById("desc-dinamica").innerText = datos.descripcion;
             document.getElementById("notas-dinamicas").innerText = datos.notas;
 
-            // 2. Cambiar el color de fondo de la sección
             document.getElementById("seccion-interactiva").style.backgroundColor = datos.colorFondo;
 
-            // 3. Actualizar la clase "activo" en los botones
             const botones = document.querySelectorAll(".btn-aroma");
             botones.forEach(btn => btn.classList.remove("activo"));
             event.target.classList.add("activo");
