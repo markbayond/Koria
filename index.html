@@ -10,10 +10,10 @@
     <style>
         /* ESTILOS GLOBALES (CSS) */
 :root {
-            --color-fondo: #F7F5F0;        /* Color del fondo general de la página */
-            --color-texto: #3B4D3C;        /* <--- Controla el texto de abajo ("Perfumes sin alcohol..."). Pon un color OSCURO para que se vea. */
-            --color-titulo-koria: #FFFFFF; /* <--- Controla ÚNICAMENTE la palabra KORIA de arriba. Pon aquí el color que quieras para KORIA. */
-            --color-morado-koria: #92759E; /* Color de la caja morada */
+            --color-fondo: #F7F5F0;        /* Color del fondo general */
+            --color-texto: #3B4D3C;        /* Color para los párrafos de abajo (verde oliva) */
+            --color-titulo-koria: #FFFFFF; /* Color para el título KORIA (blanco) */
+            --color-morado-koria: #92759E; 
             --color-lila-suave: #C3AED6;
             --transicion: all 0.5s ease-in-out;
         }
@@ -136,8 +136,8 @@
             border-radius: 2px;
         }
 
-        .hero-titulo-caja h1 {
-            color: var(--color-texto); /* <--- Cambiado a verde oscuro */
+.hero-titulo-caja h1 {
+            color: var(--color-titulo-koria); /* <--- CAMBIA ESTO (antes decía color-texto) */
             font-size: 5.5rem;
             letter-spacing: 6px;
             margin: 0;
